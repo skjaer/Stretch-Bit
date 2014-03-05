@@ -1,0 +1,54 @@
+int sensorPin = A5; //ADC for DEAP sensor
+int PWMPin = 3; //set the output pin for pwm source signal
+int OutPin = 10;
+int val = 0; //variable to store the read value of ADC
+int maxvalue = 0; //maxvalue to save the peak value
+int i = 0; //a counter
+
+int maxIn = 970;
+int minIn = 845;
+
+void setup()
+{
+  Serial.begin(57600); 
+  pinMode(PWMPin, OUTPUT);
+  pinMode(OutPin, OUTPUT);  
+}
+
+void loop()
+{
+  analogWrite(PWMPin,127); //set the output signal.
+  //PWM frequency 490, duty cycle 50%
+  val = analogRead(sensorPin);
+  
+  i++; //count every time when read a new analog input
+  if (i < 100) //find the peak from 100 samples, you can change this value
+  {
+    if (maxvalue < val )
+    {
+      maxvalue = val;
+    }
+  }
+
+  else //send the peak value to the serial port
+  {
+    Serial.print(maxvalue);
+     if(maxvalue > maxIn){
+      maxvalue=maxIn;
+    }
+    else if(maxvalue < minIn){
+      maxvalue=minIn;
+    }
+    maxvalue = map(maxvalue, maxIn, minIn, 0, 255);
+     if(maxvalue < 10){
+      maxvalue=0;
+    }
+    analogWrite(OutPin,maxvalue);
+    Serial.print(" ");
+    Serial.println(maxvalue);
+    i=0;
+    maxvalue = 0;
+  }
+}
+
+
